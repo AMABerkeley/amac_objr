@@ -79,7 +79,7 @@ def objectCallback(object):
          
             ang_vel = -(x_pos - camera_center)/ speed_coefficient
            
-            if (ang_vel >= -(min_ang_vel/2)) and (ang_vel <= (min_ang_vel/2)):
+            if (ang_vel >= -(min_ang_vel/3)) and (ang_vel <= (min_ang_vel/3)):
                set_vel.angular.z = 0
                set_vel.linear.x = 0.5
             else:
