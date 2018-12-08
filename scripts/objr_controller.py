@@ -16,8 +16,11 @@ stop_flag = False
 def objectCallback(object):
    global twist_pub
    global stop_flag
-   FOLLOW = 1
-   STOP = 2
+   FOLLOW = 1 #red cheese its
+   STOP = 2 #laptop cover
+   REPEL = 3 #dad's garage
+   RESTART = 4 #sour punch bag
+
 
    id_var = 0;
    set_vel = Twist()
@@ -37,19 +40,23 @@ def objectCallback(object):
 
          id_var = object.data[i]
          # ros info object id print
-         rospy.loginfo("object_id")
-         rospy.loginfo(id_var)
+         # rospy.loginfo("object_id")
+         # rospy.loginfo(id_var)
          objectWidth = object.data[i+1]
          objectHeight = object.data[i+2]
          speed_coefficient = camera_center / max_ang_vel
 
-         if (id_var == 2):
+         if (id_var == RESTART):
+            stop_flag = False
+            break
+
+         if (id_var == STOP):
             set_vel.linear.x = 0
             set_vel.angular.z = 0
             stop_flag = True
             break
 
-         if (id_var == 1):
+         if (id_var == FOLLOW):
             if (stop_flag):
                break
             
@@ -72,14 +79,43 @@ def objectCallback(object):
          
             ang_vel = -(x_pos - camera_center)/ speed_coefficient
            
-
             if (ang_vel >= -(min_ang_vel/2)) and (ang_vel <= (min_ang_vel/2)):
                set_vel.angular.z = 0
                set_vel.linear.x = 0.5
             else:
                set_vel.angular.z = ang_vel
                set_vel.linear.x = 0.5
-            twist_pub.publish(set_vel)
+            # twist_pub.publish(set_vel)
+
+         if (id_var == REPEL):
+            if (stop_flag):
+               break
+            
+            cvHomography = np.zeros((3, 3, 1), dtype = "float")
+            cvHomography[0,0] = object.data[i + 3]
+            cvHomography[1,0] = object.data[i + 4]
+            cvHomography[2,0] = object.data[i + 5]
+            cvHomography[0,1] = object.data[i + 6]
+            cvHomography[1,1] = object.data[i + 7]
+            cvHomography[2,1] = object.data[i + 8]
+            cvHomography[0,2] = object.data[i + 9]
+            cvHomography[1,2] = object.data[i + 10]
+            cvHomography[2,2] = object.data[i + 11]
+         
+            inPts = np.array([[[0,0]], [[objectWidth, 0]], [[0, objectHeight]], [[objectWidth, objectHeight]]], dtype=np.float32)
+            outPts = cv2.perspectiveTransform(inPts, cvHomography);
+            
+
+            x_pos = (outPts[0,0,0] + outPts[1,0,0] + outPts[2,0,0] + outPts[3,0,0])/4
+         
+            ang_vel = -(x_pos - camera_center)/ speed_coefficient
+           
+            if (ang_vel >= -(min_ang_vel/2)) and (ang_vel <= (min_ang_vel/2)):
+               set_vel.angular.z = 0
+               set_vel.linear.x = -0.5
+            else:
+               set_vel.angular.z = ang_vel
+               set_vel.linear.x = -0.5
 
    else:
       # default: other object
