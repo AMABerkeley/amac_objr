@@ -1,0 +1,43 @@
+<launch>
+
+<!--     <arg name="use_rosbot" default="true"/>
+    <arg name="use_gazebo" default="false"/> -->
+
+    <arg name="teach" default="false"/>
+    <arg name="recognize" default="true"/>
+
+    <!-- <arg if="$(arg teach)" name="chosen_world" value="rosbot_world_teaching"/> -->
+    <arg if="$(arg recognize)" name="chosen_world" value="rosbot_world_recognition"/>
+
+<!--     <include if="$(arg use_rosbot)" file="$(find astra_launch)/launch/astra.launch"/>
+    <include if="$(arg use_gazebo)" file="$(find rosbot_gazebo)/launch/$(arg chosen_world).launch"/>
+    <include if="$(arg use_gazebo)" file="$(find rosbot_gazebo)/launch/rosbot.launch"/> -->
+
+<!--     <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/> -->
+
+    <node pkg="find_object_2d" type="find_object_2d" name="find_object_2d">
+        <remap from="image" to="/usb_cam0/image_raw"/>
+        <param name="gui" value="$(arg teach)"/>
+        <param if="$(arg recognize)" name="objects_path" value="~/amac_ws/src/amac_objr/objects"/>
+    </node>
+
+  <node pkg="amac_objr" name="objr_controller" type="objr_controller.py" output="screen"> 
+  </node>
+
+
+
+
+  #cameras
+
+
+
+  <node name="usb_cam0" pkg="usb_cam" type="usb_cam_node" output="screen" >
+    <param name="video_device" value="/dev/video0" />
+    <param name="image_width" value="320" />
+    <param name="image_height" value="240" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="camera_frame_id" value="usb_cam" />
+    <param name="io_method" value="mmap"/>
+  </node>
+
+</launch>
