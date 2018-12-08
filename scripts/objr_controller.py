@@ -11,16 +11,19 @@ import numpy as np
 global twist_pub
 twist_pub = Twist()
 global stop_flag
+global kill_flag
+kill_flag = False
 stop_flag = False
 
 def objectCallback(object):
    global twist_pub
    global stop_flag
+   global kill_flag
    FOLLOW = 1 #red cheese its
    STOP = 2 #laptop cover
    REPEL = 3 #dad's garage
    RESTART = 4 #sour punch bag
-
+   KILL = 5 #idk fam
 
    id_var = 0;
    set_vel = Twist()
@@ -45,6 +48,10 @@ def objectCallback(object):
          objectWidth = object.data[i+1]
          objectHeight = object.data[i+2]
          speed_coefficient = camera_center / max_ang_vel
+
+         if (id_var == KILL):
+            kill_flag = True
+            break
 
          if (id_var == RESTART):
             stop_flag = False
@@ -121,6 +128,9 @@ def objectCallback(object):
       # default: other object
       set_vel.angular.z = 0
       set_vel.linear.x = 0
+   if (kill_flag or stop_flag):
+      set_vel.angular.z = 0
+      set_vel.linear.x = 0
    twist_pub.publish(set_vel)
       
    
@@ -134,13 +144,15 @@ def listener():
 
 def object_dt():
    global twist_pub
+   global kill_flag
 
    twist_pub = rospy.Publisher('cmd_vel', Twist, queue_size=50)
 
    rate = rospy.Rate(50)
 
    while not rospy.is_shutdown():
-
+      if (kill_flag):
+         break
       # twist_pub.publish(set_vel)
       rospy.spin()
       rate.sleep()
