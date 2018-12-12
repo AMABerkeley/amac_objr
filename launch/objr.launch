@@ -3,8 +3,8 @@
 <!--     <arg name="use_rosbot" default="true"/>
     <arg name="use_gazebo" default="false"/> -->
 
-    <arg name="teach" default="false"/>
-    <arg name="recognize" default="true"/>
+    <arg name="teach" default="true"/>
+    <arg name="recognize" default="false"/>
 
     <!-- <arg if="$(arg teach)" name="chosen_world" value="rosbot_world_teaching"/> -->
     <arg if="$(arg recognize)" name="chosen_world" value="rosbot_world_recognition"/>
@@ -16,7 +16,7 @@
 <!--     <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/> -->
 
     <node pkg="find_object_2d" type="find_object_2d" name="find_object_2d">
-        <remap from="image" to="/usb_cam2/image_raw"/>
+        <remap from="image" to="/usb_cam_center/image_raw"/>
         <param name="gui" value="$(arg teach)"/>
         <param if="$(arg recognize)" name="objects_path" value="$(find amac_objr)/objects"/>
     </node>
@@ -31,7 +31,7 @@
 
 
 
-  <node name="usb_cam2" pkg="usb_cam" type="usb_cam_node" output="screen" >
+  <node name="usb_cam_center" pkg="usb_cam" type="usb_cam_node" output="screen" >
     <param name="video_device" value="/dev/video0" />
     <param name="image_width" value="320" />
     <param name="image_height" value="240" />
